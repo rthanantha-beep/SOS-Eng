@@ -1,86 +1,128 @@
-<script>
-const SHEET_ID = "1VUkd2bwpxv1_ivIo6AyD2HaoduiAOYR0Eyn4agKUOVw";
-const SHEET_NAME = "Answers"; 
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Dashboard | ห้องเชือด ม.6</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-900 font-sans min-h-screen text-slate-200 p-6">
 
-function doPost(e) {
-  // บังคับให้รับค่า CORS Option Preflight ในกรณีที่มีการส่ง Request แบบอื่นหลุดมา
-  if (typeof e === 'undefined') {
-    return ContentService.createTextOutput(JSON.stringify({status: 'error'})).setMimeType(ContentService.MimeType.JSON);
-  }
-
-  try {
-    const requestData = JSON.parse(e.postData.contents);
-    if (requestData.action === "submit") return recordAnswer(requestData);
-    if (requestData.action === "getStats") return getDashboardStats();
-  } catch (error) {
-    return ContentService.createTextOutput(JSON.stringify({ status: "error", message: error.toString() }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-function recordAnswer(data) {
-  // เปลี่ยนมาใช้ openById จะหากันเจอ 100% ไม่ว่าสคริปต์จะอยู่ที่ไหน
-  const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(SHEET_NAME);
-  
-  if (!sheet) {
-    return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "หาชื่อแท็บ Answers ไม่เจอ" }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-
-  sheet.appendRow([new Date(), data.studentId, data.questionNo, data.answer, data.difficulty]);
-  
-  return ContentService.createTextOutput(JSON.stringify({ status: "success" }))
-    .setMimeType(ContentService.MimeType.JSON);
-}
-
-function getDashboardStats() {
-  const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(SHEET_NAME);
-  
-  if (!sheet) {
-    return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "หาชื่อแท็บ Answers ไม่เจอ" }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-
-  const data = sheet.getDataRange().getValues();
-  data.shift(); // ตัดแถว Header ทิ้ง
-  
-  const stats = {};
-  
-  data.forEach(row => {
-    const qNo = row[2];
-    const ans = row[3];
-    const diff = Number(row[4]) || 0;
+  <div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-center bg-slate-800 p-6 rounded-2xl shadow-xl mb-8 border border-slate-700">
+      <div>
+        <h1 class="text-3xl font-bold text-white mb-2"><i class="fa-solid fa-chart-pie text-blue-500 mr-2"></i> สถิติห้องเชือด ม.6</h1>
+        <p class="text-slate-400">Real-time English Tutoring Analytics</p>
+      </div>
+      <button onclick="fetchStats()" id="refreshBtn" class="mt-4 md:mt-0 bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg flex items-center group">
+        <i class="fa-solid fa-rotate-right mr-2 group-hover:rotate-180 transition-transform duration-500"></i> อัปเดตข้อมูล
+      </button>
+    </div>
     
-    // ถ้าแถวไหนไม่มีเลขข้อ ให้ข้ามไป
-    if (!qNo) return;
-    
-    if (!stats[qNo]) stats[qNo] = { total: 0, A: 0, B: 0, C: 0, D: 0, totalDiff: 0, maxDiffCount: 0 };
-    
-    if (stats[qNo][ans] !== undefined) {
-      stats[qNo][ans]++;
-      stats[qNo].total++;
-      stats[qNo].totalDiff += diff;
-      if (diff >= 4) stats[qNo].maxDiffCount++; // นับคนที่โหวต 4-5 กะโหลก
+    <!-- พื้นที่แสดงผลกราฟ -->
+    <div id="dashboard-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="col-span-full text-center py-10 text-slate-500">
+        <i class="fa-solid fa-spinner fa-spin text-4xl mb-4"></i>
+        <p>กำลังโหลดข้อมูลคำตอบ...</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbwyheD4zk1qjisXP9SkolmTwevQ6iEMWgYK_XffM9DuXcGKROUBtJsl6mThOi_FjoxMYw/exec";
+
+    async function fetchStats() {
+      const container = document.getElementById('dashboard-container');
+      const btn = document.getElementById('refreshBtn');
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังดึงข้อมูล...`;
+
+      try {
+        const response = await fetch(GAS_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action: "getStats" })
+        });
+        
+        const result = await response.json();
+        renderDashboard(result.data);
+      } catch (error) {
+        console.error("Error Fetching Data:", error);
+        container.innerHTML = `
+          <div class="col-span-full text-center py-10 bg-red-900/30 rounded-2xl border border-red-800">
+            <p class="text-red-400 font-bold text-xl"><i class="fa-solid fa-circle-exclamation mr-2"></i> ดึงข้อมูลไม่สำเร็จ</p>
+          </div>`;
+      } finally {
+        btn.innerHTML = `<i class="fa-solid fa-rotate-right mr-2 group-hover:rotate-180 transition-transform duration-500"></i> อัปเดตข้อมูลล่าสุด`;
+      }
     }
-  });
 
-  const result = {};
-  for (const q in stats) {
-    const avgDiff = stats[q].total > 0 ? (stats[q].totalDiff / stats[q].total).toFixed(1) : 0;
-    const skullIcon = "💀".repeat(Math.round(avgDiff)) || "👶"; 
-    
-    result[q] = {
-      total: stats[q].total,
-      A_pct: ((stats[q].A / stats[q].total) * 100).toFixed(1),
-      B_pct: ((stats[q].B / stats[q].total) * 100).toFixed(1),
-      C_pct: ((stats[q].C / stats[q].total) * 100).toFixed(1),
-      D_pct: ((stats[q].D / stats[q].total) * 100).toFixed(1),
-      avgDifficulty: skullIcon,
-      hardAlert: stats[q].maxDiffCount > (stats[q].total / 2) // เตือนถ้าโหวตว่ายากเกินครึ่ง
-    };
-  }
-  
-  return ContentService.createTextOutput(JSON.stringify({ status: "success", data: result }))
-    .setMimeType(ContentService.MimeType.JSON);
-}
-</script>
+    function renderDashboard(data) {
+      const container = document.getElementById('dashboard-container');
+      container.innerHTML = '';
+      
+      const keys = Object.keys(data).sort((a,b) => Number(a) - Number(b)); // เรียงเลขข้อ
+
+      if(keys.length === 0) {
+        container.innerHTML = `<div class="col-span-full text-center py-10 text-slate-500">ยังไม่มีข้อมูลการตอบ</div>`;
+        return;
+      }
+
+      keys.forEach(question => {
+        const stats = data[question];
+        const card = document.createElement('div');
+        
+        // ถ้าเตือนว่ายาก (hardAlert=true) ให้ใส่ขอบสีแดง
+        const borderClass = stats.hardAlert ? 'border-red-500/50 bg-red-900/10' : 'border-slate-700 bg-slate-800';
+        
+        card.className = `p-6 rounded-2xl shadow-xl border ${borderClass} relative overflow-hidden`;
+        
+        card.innerHTML = `
+          ${stats.hardAlert ? '<div class="absolute top-0 right-0 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">อธิบายด่วน!</div>' : ''}
+          
+          <div class="flex justify-between items-end mb-5 border-b border-slate-700 pb-3">
+            <div>
+              <h2 class="text-3xl font-black text-white">ข้อที่ ${question}</h2>
+              <p class="text-slate-400 text-sm mt-1"><i class="fa-solid fa-users mr-1"></i> ตอบแล้ว ${stats.total} คน</p>
+            </div>
+            <div class="text-right">
+              <div class="text-2xl">${stats.avgDifficulty || '👶'}</div>
+              <p class="text-[10px] text-slate-500 uppercase tracking-widest mt-1">Difficulty</p>
+            </div>
+          </div>
+          
+          <div class="space-y-4">
+            ${createBar('A', stats.A_pct, 'bg-emerald-500')}
+            ${createBar('B', stats.B_pct, 'bg-sky-500')}
+            ${createBar('C', stats.C_pct, 'bg-amber-500')}
+            ${createBar('D', stats.D_pct, 'bg-rose-500')}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function createBar(choice, percent, colorClass) {
+      const validPercent = isNaN(percent) ? 0 : percent;
+      // ไฮไลต์ตัวอักษรชอยส์ถ้ามีคนตอบเกิน 0%
+      const textIntensity = validPercent > 0 ? 'text-white font-bold' : 'text-slate-500';
+      
+      return `
+        <div>
+          <div class="flex justify-between text-sm mb-1">
+            <span class="${textIntensity} w-6">${choice}</span>
+            <span class="text-slate-300 font-mono">${validPercent}%</span>
+          </div>
+          <div class="w-full bg-slate-900 rounded-full h-3 border border-slate-700/50">
+            <div class="${colorClass} h-3 rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(255,255,255,0.1)]" style="width: ${validPercent}%"></div>
+          </div>
+        </div>
+      `;
+    }
+
+    // โหลดข้อมูลอัตโนมัติ
+    window.onload = fetchStats;
+  </script>
+</body>
+</html>
