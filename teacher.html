@@ -1,3 +1,4 @@
+<script>
 const SHEET_ID = "1VUkd2bwpxv1_ivIo6AyD2HaoduiAOYR0Eyn4agKUOVw";
 const SHEET_NAME = "Answers"; 
 
@@ -82,3 +83,4 @@ function getDashboardStats() {
   return ContentService.createTextOutput(JSON.stringify({ status: "success", data: result }))
     .setMimeType(ContentService.MimeType.JSON);
 }
+</script>
