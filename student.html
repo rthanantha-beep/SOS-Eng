@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SOS-Eng | ห้องเชือด ม.6</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    /* ซ่อน input type number ลูกศรขึ้นลง */
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  </style>
+</head>
+<body class="bg-slate-50 font-sans min-h-screen pb-20">
+
+  <!-- Header -->
+  <div class="bg-slate-900 text-white p-5 rounded-b-3xl shadow-lg text-center mb-6">
+    <h1 class="text-2xl font-bold tracking-wider">🔥 SOS-Eng</h1>
+    <p class="text-slate-400 text-sm">Survive the English Room</p>
+  </div>
+
+  <div class="max-w-md mx-auto px-4">
+    
+    <!-- ส่วนเลือกข้อคำถาม -->
+    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 mb-6 flex items-center justify-between">
+      <span class="text-slate-500 font-bold">ข้อที่กำลังทำ:</span>
+      <div class="flex items-center space-x-3">
+        <button onclick="changeQ(-1)" class="w-10 h-10 bg-slate-100 rounded-full text-slate-600 font-bold text-xl hover:bg-slate-200 active:scale-95 transition">-</button>
+        <input type="number" id="qNo" value="1" class="w-16 text-center text-2xl font-bold text-slate-800 bg-transparent outline-none">
+        <button onclick="changeQ(1)" class="w-10 h-10 bg-slate-100 rounded-full text-slate-600 font-bold text-xl hover:bg-slate-200 active:scale-95 transition">+</button>
+      </div>
+    </div>
+
+    <!-- ส่วนเลือกคำตอบ -->
+    <h2 class="text-slate-700 font-bold mb-3 px-2">1. เลือกคำตอบของคุณ</h2>
+    <div class="grid grid-cols-2 gap-4 mb-8">
+      <button onclick="selectAns('A')" id="btn-A" class="ans-btn bg-white border-2 border-slate-200 text-slate-400 text-3xl font-bold py-6 rounded-2xl transition-all duration-200 shadow-sm hover:border-blue-400">A</button>
+      <button onclick="selectAns('B')" id="btn-B" class="ans-btn bg-white border-2 border-slate-200 text-slate-400 text-3xl font-bold py-6 rounded-2xl transition-all duration-200 shadow-sm hover:border-blue-400">B</button>
+      <button onclick="selectAns('C')" id="btn-C" class="ans-btn bg-white border-2 border-slate-200 text-slate-400 text-3xl font-bold py-6 rounded-2xl transition-all duration-200 shadow-sm hover:border-blue-400">C</button>
+      <button onclick="selectAns('D')" id="btn-D" class="ans-btn bg-white border-2 border-slate-200 text-slate-400 text-3xl font-bold py-6 rounded-2xl transition-all duration-200 shadow-sm hover:border-blue-400">D</button>
+    </div>
+
+    <!-- ส่วนเรตติ้งความยาก -->
+    <h2 class="text-slate-700 font-bold mb-3 px-2">2. ความยากระดับไหน?</h2>
+    <div class="flex flex-col gap-3 mb-8">
+      <!-- ใช้เทคนิค peer ของ Tailwind เพื่อทำปุ่ม Radio ให้เป็น Card สวยๆ -->
+      <label class="cursor-pointer">
+        <input type="radio" name="difficulty" value="1" class="peer hidden">
+        <div class="p-4 bg-white border-2 border-slate-100 rounded-xl peer-checked:border-green-500 peer-checked:bg-green-50 transition-all flex items-center shadow-sm">
+          <span class="text-2xl mr-3">👶</span>
+          <span class="font-bold text-slate-700">1 - หลับตาทำยังถูก (จิ๊บๆ)</span>
+        </div>
+      </label>
+      <label class="cursor-pointer">
+        <input type="radio" name="difficulty" value="2" class="peer hidden">
+        <div class="p-4 bg-white border-2 border-slate-100 rounded-xl peer-checked:border-blue-500 peer-checked:bg-blue-50 transition-all flex items-center shadow-sm">
+          <span class="text-2xl mr-3">💀</span>
+          <span class="font-bold text-slate-700">2 - พอตึงมือเบาๆ</span>
+        </div>
+      </label>
+      <label class="cursor-pointer">
+        <input type="radio" name="difficulty" value="3" class="peer hidden" checked>
+        <div class="p-4 bg-white border-2 border-slate-100 rounded-xl peer-checked:border-yellow-500 peer-checked:bg-yellow-50 transition-all flex items-center shadow-sm">
+          <span class="text-xl mr-3">💀💀</span>
+          <span class="font-bold text-slate-700">3 - ต้องใช้สมองนิดนึง</span>
+        </div>
+      </label>
+      <label class="cursor-pointer">
+        <input type="radio" name="difficulty" value="4" class="peer hidden">
+        <div class="p-4 bg-white border-2 border-slate-100 rounded-xl peer-checked:border-orange-500 peer-checked:bg-orange-50 transition-all flex items-center shadow-sm">
+          <span class="text-sm mr-3 tracking-tighter">💀💀💀</span>
+          <span class="font-bold text-slate-700">4 - ร้องขอชีวิต (ยากเกิ๊น)</span>
+        </div>
+      </label>
+      <label class="cursor-pointer">
+        <input type="radio" name="difficulty" value="5" class="peer hidden">
+        <div class="p-4 bg-white border-2 border-slate-100 rounded-xl peer-checked:border-red-500 peer-checked:bg-red-50 transition-all flex items-center shadow-sm">
+          <span class="text-2xl mr-3">🪦</span>
+          <span class="font-bold text-red-600">5 - วิญญาณหลุดร่าง!</span>
+        </div>
+      </label>
+    </div>
+
+    <!-- ปุ่มส่งคำตอบ -->
+    <button onclick="submitData()" id="submitBtn" class="w-full bg-slate-900 text-white font-bold py-4 rounded-2xl shadow-xl hover:bg-slate-800 active:scale-95 transition-all text-lg flex items-center justify-center">
+      <i class="fa-solid fa-paper-plane mr-2"></i> ส่งคำตอบเลย!
+    </button>
+
+    <!-- ปุ่ม SOS -->
+    <div class="text-center mt-6">
+      <button onclick="sosLine()" class="text-slate-400 hover:text-red-500 text-sm transition-colors border-b border-dashed border-slate-300 pb-1">
+        <i class="fa-brands fa-line mr-1 text-green-500"></i> อธิบายจบแล้วหนูก็ยังไม่เก็ท แอดไลน์จารย์
+      </button>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-full shadow-2xl flex items-center opacity-0 pointer-events-none transition-all duration-300 z-50 translate-y-[-20px]">
+    <i class="fa-solid fa-circle-check mr-2 text-xl"></i> 
+    <span class="font-bold">ส่งคำตอบสำเร็จ!</span>
+  </div>
+
+  <script>
+    // URL ที่รับมา
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbwyheD4zk1qjisXP9SkolmTwevQ6iEMWgYK_XffM9DuXcGKROUBtJsl6mThOi_FjoxMYw/exec";
+    let selectedAnswer = "";
+
+    function changeQ(step) {
+      let current = parseInt(document.getElementById('qNo').value) || 1;
+      let next = current + step;
+      if (next < 1) next = 1;
+      document.getElementById('qNo').value = next;
+    }
+
+    function selectAns(ans) {
+      selectedAnswer = ans;
+      document.querySelectorAll('.ans-btn').forEach(btn => {
+        btn.className = "ans-btn bg-white border-2 border-slate-200 text-slate-400 text-3xl font-bold py-6 rounded-2xl transition-all duration-200 shadow-sm hover:border-blue-400";
+      });
+      const activeBtn = document.getElementById(`btn-${ans}`);
+      activeBtn.className = "ans-btn bg-blue-600 border-2 border-blue-600 text-white text-3xl font-bold py-6 rounded-2xl transition-all duration-200 shadow-md scale-105 ring-4 ring-blue-200";
+    }
+
+    function showToast() {
+      const toast = document.getElementById('toast');
+      toast.classList.remove('opacity-0', 'translate-y-[-20px]');
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-[-20px]');
+      }, 3000);
+    }
+
+    async function submitData() {
+      const qNo = document.getElementById('qNo').value;
+      const diffInput = document.querySelector('input[name="difficulty"]:checked');
+      
+      if (!qNo || !selectedAnswer || !diffInput) {
+        alert("⚠️ เลือกคำตอบก่อนส่งนะวัยรุ่น!");
+        return;
+      }
+
+      const btn = document.getElementById('submitBtn');
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังส่ง...`;
+      btn.disabled = true;
+      btn.classList.add('opacity-75');
+
+      try {
+        await fetch(GAS_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "submit",
+            studentId: "M.6-Student", 
+            questionNo: qNo,
+            answer: selectedAnswer,
+            difficulty: Number(diffInput.value)
+          })
+        });
+        
+        showToast();
+        selectedAnswer = "";
+        changeQ(1); // เลื่อนข้อถัดไป
+        // รีเซ็ต UI ชอยส์
+        document.querySelectorAll('.ans-btn').forEach(btn => {
+          btn.className = "ans-btn bg-white border-2 border-slate-200 text-slate-400 text-3xl font-bold py-6 rounded-2xl transition-all duration-200 shadow-sm hover:border-blue-400";
+        });
+      } catch (e) {
+        alert("เชื่อมต่อล้มเหลว ลองใหม่อีกครั้งครับ");
+      } finally {
+        btn.innerHTML = `<i class="fa-solid fa-paper-plane mr-2"></i> ส่งคำตอบเลย!`;
+        btn.disabled = false;
+        btn.classList.remove('opacity-75');
+      }
+    }
+
+    function sosLine() {
+      if(confirm("เปิดหน้าเพิ่มเพื่อน LINE (rtnpk) เพื่อถามจารย์นอกรอบ กด OK เพื่อไปต่อได้เลยครับ ✌️")) {
+        window.open("https://line.me/ti/p/~rtnpk", "_blank");
+      }
+    }
+  </script>
+</body>
+</html>
